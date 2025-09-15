@@ -27,9 +27,9 @@ class PostureClassifier:
         if any(v is None for v in keypoints.values()):
             return "Uncertain"
 
-        shoulders_y = np.mean([keypoints["left_shoulder"][1], keypoints["right_shoulder"][1]])
-        hips_y = np.mean([keypoints["left_hip"][1], keypoints["right_hip"][1]])
-        knees_y = np.mean([keypoints["left_knee"][1], keypoints["right_knee"][1]])
+        shoulders_y = np.mean([keypoints["left_shoulder"], keypoints["right_shoulder"]])
+        hips_y = np.mean([keypoints["left_hip"], keypoints["right_hip"]])
+        knees_y = np.mean([keypoints["left_knee"], keypoints["right_knee"]])
 
         shoulder_hip_dist = hips_y - shoulders_y
         hip_knee_dist = knees_y - hips_y
@@ -47,24 +47,26 @@ class PostureClassifier:
 class DemographicsDetector:
     def __init__(self):
         # Load pre-trained models
-        self.age_net = cv2.dnn.readNetFromCaffe('age_deploy.prototxt', 'age_net.caffemodel')
-        self.gender_net = cv2.dnn.readNetFromCaffe('gender_deploy.prototxt', 'gender_net.caffemodel')
+        self.age_net = cv2.dnn.readNetFromCaffe('models/age_deploy.prototxt', 'models/age_net.caffemodel')
+        self.gender_net = cv2.dnn.readNetFromCaffe('models/gender_deploy.prototxt', 'models/gender_net.caffemodel')
 
         self.age_list = ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
         self.gender_list = ['Male', 'Female']
 
     def detect_age_gender(self, frame):
+        if frame is None or frame.size == 0:
+            return "N/A", "N/A"
         # Prepare input for the model
         blob = cv2.dnn.blobFromImage(frame, 1, (227, 227), (78.0, 87.0, 114.0), swapRB=False)
         
         # Predict Gender
         self.gender_net.setInput(blob)
         gender_preds = self.gender_net.forward()
-        gender = self.gender_list[gender_preds[0].argmax()]
+        gender = self.gender_list[gender_preds.argmax()]
 
         # Predict Age
         self.age_net.setInput(blob)
         age_preds = self.age_net.forward()
-        age = self.age_list[age_preds[0].argmax()]
+        age = self.age_list[age_preds.argmax()]
 
         return age, gender

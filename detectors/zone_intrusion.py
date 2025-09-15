@@ -12,7 +12,12 @@ class ZoneIntrusionDetector:
             return json.load(f)
 
     def point_in_polygon(self, point, polygon):
-        return cv2.pointPolygonTest(np.array(polygon, dtype=np.int32), point, False) >= 0
+        # Ensure point is a tuple of two ints/floats
+        if isinstance(point, (np.ndarray, list, tuple)) and len(point) == 2:
+            pt = (float(point[0]), float(point[1]))
+        else:
+            return False
+        return cv2.pointPolygonTest(np.array(polygon, dtype=np.int32), pt, False) >= 0
 
     def detect_intrusions(self, camera_name, tracked_objects):
         intrusions = []
@@ -21,7 +26,7 @@ class ZoneIntrusionDetector:
 
         for obj_id, obj in tracked_objects.items():
             centroid = obj.get("centroid", None)
-            if not centroid:
+            if centroid is None or (isinstance(centroid, (np.ndarray, list, tuple)) and len(centroid) == 0):
                 continue
 
             for zone in self.zones[camera_name]:

@@ -24,9 +24,13 @@ camera_feeds = {
 }
 
 def process_camera(camera_id, path, user_email="recipient@example.com"):
+    print(f"Processing camera: {camera_id}, video path: {path}")
     abandoned_objects = {}  # Moved to local variable inside function
 
     cap = cv2.VideoCapture(path)
+    if not cap.isOpened():
+        print(f"ERROR: Could not open video file {path} for camera {camera_id}")
+        return
 
     detector = PersonDetector()
     tracker = CentroidTracker()
@@ -38,10 +42,13 @@ def process_camera(camera_id, path, user_email="recipient@example.com"):
     loitering_detector = LoiteringDetector()
     counter = LineCounter(line_position=300)
 
+    frame_count = 0
     while True:
         ret, frame = cap.read()
         if not ret:
+            print(f"End of video or cannot read frame for camera {camera_id}. Total frames processed: {frame_count}")
             break
+        frame_count += 1
 
         orig_frame = frame.copy()
         alert_text = ""
@@ -187,8 +194,9 @@ def process_camera(camera_id, path, user_email="recipient@example.com"):
         })
 
         if alert_text.strip():
-            send_email_alert("⚠️ Camera Alert", f"{alert_text.strip()} @ {timestamp}")
-            send_whatsapp_alert(f"⚠️ {alert_text.strip()} @ {timestamp}")
+            # send_email_alert("⚠️ Camera Alert", f"{alert_text.strip()} @ {timestamp}")
+            # send_whatsapp_alert(f"⚠️ {alert_text.strip()} @ {timestamp}")
+            print(f"ALERT: {alert_text.strip()} @ {timestamp}")
         
         # Zone heatmap overlay
         zone_overlay = frame.copy()
@@ -239,6 +247,7 @@ def main():
     for camera_id, path in camera_feeds.items():
         process_camera(camera_id, path)
 
+    print("All cameras processed. Destroying windows.")
     cv2.destroyAllWindows()
 
 # if __name__ == "__main__":
@@ -246,7 +255,7 @@ def main():
 #     main()
 
 if __name__ == "__main__":
-    dashboard_app.run(debug=True)
+    print("Starting main.py")
     main()
 
 
