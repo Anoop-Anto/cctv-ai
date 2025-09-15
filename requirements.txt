@@ -19,5 +19,6 @@ twilio
 flask
 eventlet
 dash
-Flask-SocketIOuv
+Flask-SocketIO
 seaborn
+

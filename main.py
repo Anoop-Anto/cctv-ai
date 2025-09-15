@@ -76,7 +76,7 @@ def process_camera(camera_id, path, user_email="recipient@example.com"):
              for alert in loitering_alerts:
                  print("alert - ", alert)
 
-        cv2.imshow(f"Camera {camera_id}", frame)
+        # cv2.imshow(f"Camera {camera_id}", frame)
 
         # Inactivity check
         inactive_objects = []
@@ -212,9 +212,9 @@ def process_camera(camera_id, path, user_email="recipient@example.com"):
 
         frame = cv2.addWeighted(zone_overlay, 0.4, frame, 0.6, 0)
 
-        cv2.imshow(f"People Flow - {camera_id}", frame)
-        if cv2.waitKey(1) == ord('q'):
-            break
+        # cv2.imshow(f"People Flow - {camera_id}", frame)
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
 
     # Saving Heatmap
     os.makedirs("logs", exist_ok=True)
@@ -248,7 +248,7 @@ def main():
         process_camera(camera_id, path)
 
     print("All cameras processed. Destroying windows.")
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
 # if __name__ == "__main__":
 #     dashboard_app.run_server(debug=True)
